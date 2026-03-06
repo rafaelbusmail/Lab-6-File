@@ -31,12 +31,7 @@ public class FileManager {
             int inicio = i;
             while (i < textoCompleto.length()) {
                 AttributeSet a2 = doc.getCharacterElement(i).getAttributes();
-                if (!StyleConstants.getFontFamily(a2).equals(fuente)
-                        || StyleConstants.getFontSize(a2) != tamano
-                        || StyleConstants.isBold(a2) != negrita
-                        || StyleConstants.isItalic(a2) != cursiva
-                        || StyleConstants.isUnderline(a2) != subray
-                        || !StyleConstants.getForeground(a2).equals(color)) {
+                if (!StyleConstants.getFontFamily(a2).equals(fuente) || StyleConstants.getFontSize(a2) != tamano || StyleConstants.isBold(a2) != negrita || StyleConstants.isItalic(a2) != cursiva | StyleConstants.isUnderline(a2) != subray || !StyleConstants.getForeground(a2).equals(color)) {
                     break;
                 }
                 i++;
@@ -58,8 +53,7 @@ public class FileManager {
                     if (subray) {
                         run.setUnderline(UnderlinePatterns.SINGLE);
                     }
-                    run.setColor(String.format("%02X%02X%02X",
-                            color.getRed(), color.getGreen(), color.getBlue()));
+                    run.setColor(String.format("%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue()));
                     run.setText(lineas[l]);
                 }
             }
@@ -105,8 +99,7 @@ public class FileManager {
                 String colorHex = run.getColor();
                 if (colorHex != null && !colorHex.equalsIgnoreCase("auto")) {
                     try {
-                        StyleConstants.setForeground(attrs,
-                                Color.decode("#" + colorHex));
+                        StyleConstants.setForeground(attrs, Color.decode("#" + colorHex));
                     } catch (NumberFormatException ignored) {
                     }
                 }
