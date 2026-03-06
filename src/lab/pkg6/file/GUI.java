@@ -9,20 +9,16 @@ import java.io.*;
 public class GUI extends JFrame {
 
     private JTextPane textPane;
-    private Lab6File lab6File;
+    private FileManager fileManager;
     private String rutaActual = null;
-
     private JButton btnNuevo, btnAbrir, btnGuardar;
-
     private JButton btnNegrita, btnCursiva, btnSubrayado;
-    private JButton btnFuente;
-    private JButton btnColor;
-
+    private JButton btnFuente, btnColor;
     private JPanel panelColores;
     private int indexColor = 0;
 
     public GUI() {
-        lab6File = new Lab6File();
+        fileManager = new FileManager();
         initComponents();
     }
 
@@ -32,13 +28,13 @@ public class GUI extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
+        // ── TOOLBAR ──────────────────────────────────────────────────
         JToolBar toolbar = new JToolBar();
         toolbar.setFloatable(false);
 
         btnNuevo = new JButton("Nuevo");
         btnAbrir = new JButton("Abrir");
         btnGuardar = new JButton("Guardar");
-
         btnNegrita = new JButton("N");
         btnCursiva = new JButton("K");
         btnSubrayado = new JButton("S");
@@ -113,7 +109,7 @@ public class GUI extends JFrame {
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             try {
                 rutaActual = chooser.getSelectedFile().getAbsolutePath();
-                lab6File.abrir(textPane, rutaActual);
+                fileManager.abrir(textPane, rutaActual);
                 setTitle("Editor de Texto - " + chooser.getSelectedFile().getName());
             } catch (IOException e) {
                 JOptionPane.showMessageDialog(this, "Error al abrir: " + e.getMessage());
@@ -134,13 +130,14 @@ public class GUI extends JFrame {
             }
         }
         try {
-            lab6File.guardar(textPane, rutaActual);
+            fileManager.guardar(textPane, rutaActual);
             JOptionPane.showMessageDialog(this, "Guardado correctamente.");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error al guardar: " + e.getMessage());
         }
     }
 
+    // ── FORMATO ──────────────────────────────────────────────────────
     private void toggleFormato(Object key) {
         StyledDocument doc = textPane.getStyledDocument();
         int inicio = textPane.getSelectionStart();
@@ -149,10 +146,9 @@ public class GUI extends JFrame {
             return;
         }
 
-        Element elem = doc.getCharacterElement(inicio);
-        AttributeSet as = elem.getAttributes();
-
+        AttributeSet as = doc.getCharacterElement(inicio).getAttributes();
         SimpleAttributeSet attr = new SimpleAttributeSet();
+
         if (key == StyleConstants.Bold) {
             StyleConstants.setBold(attr, !StyleConstants.isBold(as));
         } else if (key == StyleConstants.Italic) {
@@ -185,11 +181,9 @@ public class GUI extends JFrame {
         int idx = indexColor % panelColores.getComponentCount();
         JButton btn = (JButton) panelColores.getComponent(idx);
         btn.setBackground(color);
-
         for (ActionListener al : btn.getActionListeners()) {
             btn.removeActionListener(al);
         }
-
         btn.addActionListener(e -> aplicarColorDirecto(color));
         indexColor++;
         panelColores.revalidate();
@@ -202,14 +196,9 @@ public class GUI extends JFrame {
         if (inicio == fin) {
             return;
         }
-
         SimpleAttributeSet attr = new SimpleAttributeSet();
         StyleConstants.setForeground(attr, color);
         textPane.getStyledDocument()
                 .setCharacterAttributes(inicio, fin - inicio, attr, false);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new GUI());
     }
 }
