@@ -11,7 +11,6 @@ public class GUI extends JFrame {
     private JTextPane textPane;
     private FileManager fileManager;
     private String rutaActual = null;
-
     private JButton btnNuevo, btnAbrir, btnGuardar;
     private JToggleButton btnNegrita, btnCursiva, btnSubrayado;
     private JButton btnColor;
