@@ -44,13 +44,15 @@ public class GUI_fonts extends JDialog {
     public GUI_fonts(Frame owner, JTextPane textPane) {
         super(owner, "Fuente", true);
         this.textPane = textPane;
-        pack();
+        
         initComponents();
         setupLayout();
         setupListeners();
         cargarValoresActuales();
+        pack();
         setLocationRelativeTo(owner);
         setResizable(false);
+        
     }
 
     private void initComponents() {
@@ -85,7 +87,7 @@ public class GUI_fonts extends JDialog {
         JPanel main = new JPanel(new BorderLayout(8, 8));
         main.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        JPanel previewPanel = new JPanel(new BorderLayout());
+        previewPanel = new JPanel(new BorderLayout());
         previewPanel.setBorder(BorderFactory.createTitledBorder("Vista Previa"));
         previewPanel.setPreferredSize(new Dimension(430, 70));
         previewPanel.add(previewLabel, BorderLayout.CENTER);

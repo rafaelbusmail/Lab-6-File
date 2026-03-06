@@ -31,7 +31,7 @@ public class FileManager {
             int inicio = i;
             while (i < textoCompleto.length()) {
                 AttributeSet a2 = doc.getCharacterElement(i).getAttributes();
-                if (!StyleConstants.getFontFamily(a2).equals(fuente) || StyleConstants.getFontSize(a2) != tamano || StyleConstants.isBold(a2) != negrita || StyleConstants.isItalic(a2) != cursiva | StyleConstants.isUnderline(a2) != subray || !StyleConstants.getForeground(a2).equals(color)) {
+                if (!StyleConstants.getFontFamily(a2).equals(fuente) || StyleConstants.getFontSize(a2) != tamano || StyleConstants.isBold(a2) != negrita || StyleConstants.isItalic(a2) != cursiva || StyleConstants.isUnderline(a2) != subray || !StyleConstants.getForeground(a2).equals(color)) {
                     break;
                 }
                 i++;
@@ -61,63 +61,57 @@ public class FileManager {
 
         try (FileOutputStream fos = new FileOutputStream(ruta)) {
             docx.write(fos);
+        } finally {
+            docx.close();
         }
-        docx.close();
     }
 
     public void abrir(JTextPane textPane, String ruta) throws IOException {
-        FileInputStream fis = new FileInputStream(ruta);
-        XWPFDocument docx = new XWPFDocument(fis);
+        try (FileInputStream fis = new FileInputStream(ruta); XWPFDocument docx = new XWPFDocument(fis)) {
 
-        textPane.setText("");
-        StyledDocument doc = textPane.getStyledDocument();
+            textPane.setText("");
+            StyledDocument doc = textPane.getStyledDocument();
 
-        for (XWPFParagraph parrafo : docx.getParagraphs()) {
-            for (XWPFRun run : parrafo.getRuns()) {
-                String texto = run.getText(0);
-                if (texto == null) {
-                    continue;
-                }
+            for (XWPFParagraph parrafo : docx.getParagraphs()) {
+                for (XWPFRun run : parrafo.getRuns()) {
+                    String texto = run.getText(0);
+                    if (texto == null) {
+                        continue;
+                    }
 
-                SimpleAttributeSet attrs = new SimpleAttributeSet();
+                    SimpleAttributeSet attrs = new SimpleAttributeSet();
+                    String fuente = run.getFontName();
+                    if (fuente != null) {
+                        StyleConstants.setFontFamily(attrs, fuente);
+                    }
 
-                String fuente = run.getFontName();
-                if (fuente != null) {
-                    StyleConstants.setFontFamily(attrs, fuente);
-                }
+                    int tamano = run.getFontSize();
+                    StyleConstants.setFontSize(attrs, tamano > 0 ? tamano : 12);
 
-                int tamano = run.getFontSize();
-                if (tamano > 0) {
-                    StyleConstants.setFontSize(attrs, tamano);
-                }
+                    StyleConstants.setBold(attrs, run.isBold());
+                    StyleConstants.setItalic(attrs, run.isItalic());
+                    StyleConstants.setUnderline(attrs, run.getUnderline() != UnderlinePatterns.NONE);
 
-                StyleConstants.setBold(attrs, run.isBold());
-                StyleConstants.setItalic(attrs, run.isItalic());
-                StyleConstants.setUnderline(attrs,
-                        run.getUnderline() != UnderlinePatterns.NONE);
+                    String colorHex = run.getColor();
+                    if (colorHex != null && !colorHex.equalsIgnoreCase("auto")) {
+                        try {
+                            StyleConstants.setForeground(attrs, Color.decode("#" + colorHex));
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
 
-                String colorHex = run.getColor();
-                if (colorHex != null && !colorHex.equalsIgnoreCase("auto")) {
                     try {
-                        StyleConstants.setForeground(attrs, Color.decode("#" + colorHex));
-                    } catch (NumberFormatException ignored) {
+                        doc.insertString(doc.getLength(), texto, attrs);
+                    } catch (BadLocationException e) {
+                        throw new IOException("Error insertando texto: " + e.getMessage());
                     }
                 }
-
                 try {
-                    doc.insertString(doc.getLength(), texto, attrs);
+                    doc.insertString(doc.getLength(), "\n", new SimpleAttributeSet());
                 } catch (BadLocationException e) {
-                    throw new IOException("Error insertando texto: " + e.getMessage());
+                    throw new IOException("Error insertando salto: " + e.getMessage());
                 }
             }
-            try {
-                doc.insertString(doc.getLength(), "\n", new SimpleAttributeSet());
-            } catch (BadLocationException e) {
-                throw new IOException("Error insertando salto: " + e.getMessage());
-            }
         }
-
-        fis.close();
-        docx.close();
     }
 }

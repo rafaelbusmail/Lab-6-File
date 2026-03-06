@@ -115,7 +115,7 @@ public class GUI extends JFrame {
 
         panelColores = new JPanel(new GridLayout(3, 8, 2, 2));
         for (int i = 0; i < 24; i++) {
-            JPanel slot = crearSlotColor(Color.WHITE);
+            JPanel slot = crearSlotColor(new Color(220, 220, 220));
             panelColores.add(slot);
         }
         panelDerecho.add(panelColores, BorderLayout.CENTER);
@@ -293,14 +293,21 @@ public class GUI extends JFrame {
     }
 
     private void nuevo() {
-        textPane.setText("");
-        textPane.setDocument(new DefaultStyledDocument());
-        rutaActual = null;
-        setTitle("Editor de Texto - Nuevo");
+    if (textPane.getDocument().getLength() > 0) {
+        int resp = JOptionPane.showConfirmDialog(this,
+            "¿Desea guardar los cambios antes de crear un nuevo documento?",
+            "Nuevo documento", JOptionPane.YES_NO_CANCEL_OPTION);
+        if (resp == JOptionPane.YES_OPTION) guardar();
+        else if (resp == JOptionPane.CANCEL_OPTION) return;
+    }
+    textPane.setDocument(new DefaultStyledDocument());
+    rutaActual = null;
+    setTitle("Editor de Texto - Nuevo");
     }
 
     private void abrir() {
         JFileChooser chooser = new JFileChooser();
+        chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Documentos Word (*.docx)", "docx"));
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             try {
                 rutaActual = chooser.getSelectedFile().getAbsolutePath();
@@ -315,9 +322,10 @@ public class GUI extends JFrame {
     private void guardar() {
         if (rutaActual == null) {
             JFileChooser chooser = new JFileChooser();
+            chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Documentos Word (*.docx)", "docx"));
             if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
                 rutaActual = chooser.getSelectedFile().getAbsolutePath();
-                if (!rutaActual.endsWith(".docx")) {
+                if (!rutaActual.toLowerCase().endsWith(".docx")) {
                     rutaActual += ".docx";
                 }
             } else {
